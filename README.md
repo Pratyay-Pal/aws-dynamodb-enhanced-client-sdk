@@ -12,8 +12,8 @@ You must create a DynamoDB table named "users". Create columns with the exact na
 ![Image](ReadmeScreens/gsi.png?raw=true)
 
 #### Accessing the endpoints
-Hit **http://localhost:8080/<endpoint>** with details to do Database operations.<br><br><br>
-**<endpoint>** can be as follows-<br><br>
+Hit **http://localhost:8080/endpoint** with details to do Database operations.<br><br><br>
+**endpoint** can be as follows-<br><br>
 /allUsers - Lists all users<br>
 /getUserDetails - Get specific user details. Requires user_id as request body<br>
 /createUser - Create a new user. Requires name, email, ign as request body<br>
