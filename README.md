@@ -1,4 +1,4 @@
-# aws-dynamodb-enhanced-client-adk
+# aws-dynamodb-enhanced-client-sdk
 
 Uses enhanced DynamoDB Client from Java AWS SDK v2. This contains some the basic operations on DynamoDB table<br>
 
