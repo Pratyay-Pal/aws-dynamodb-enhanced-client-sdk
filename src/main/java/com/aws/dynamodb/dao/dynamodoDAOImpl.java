@@ -169,15 +169,15 @@ public class dynamodoDAOImpl implements dynamodbDAO{
         Map<String , AttributeValue> exclusiveStartKey= new HashMap<>();
         exclusiveStartKey.put("user_id", attributeValue);        
         try {
-        ScanEnhancedRequest scanRequest = ScanEnhancedRequest.builder()
-                .exclusiveStartKey(exclusiveStartKey)
-                .limit(count) 
-                .build();        
-        PageIterable<users> pageIterable = dbTable.scan(scanRequest);
-        Iterator<Page<users>> pageIterator = pageIterable.iterator();        
-        Page<users> page = pageIterator.next();
-        userList.addAll(page.items());
-        exclusiveStartKey = page.lastEvaluatedKey();      
+        	ScanEnhancedRequest scanRequest = ScanEnhancedRequest.builder()
+        			.exclusiveStartKey(exclusiveStartKey)
+        			.limit(count) 
+        			.build();        
+        	PageIterable<users> pageIterable = dbTable.scan(scanRequest);
+        	Iterator<Page<users>> pageIterator = pageIterable.iterator();        
+        	Page<users> page = pageIterator.next();
+        	userList.addAll(page.items());
+        	exclusiveStartKey = page.lastEvaluatedKey();      
         } catch(Exception e) {
         	logger.error("ERROR");
         	e.printStackTrace();
