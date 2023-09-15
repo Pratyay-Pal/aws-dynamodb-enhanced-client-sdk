@@ -1,8 +1,10 @@
 package com.aws.dynamodb.dao;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -19,13 +21,26 @@ import software.amazon.awssdk.enhanced.dynamodb.TableSchema;
 import software.amazon.awssdk.enhanced.dynamodb.model.DeleteItemEnhancedRequest;
 import software.amazon.awssdk.enhanced.dynamodb.model.GetItemEnhancedRequest;
 import software.amazon.awssdk.enhanced.dynamodb.model.Page;
+import software.amazon.awssdk.enhanced.dynamodb.model.PageIterable;
 import software.amazon.awssdk.enhanced.dynamodb.model.QueryConditional;
+import software.amazon.awssdk.enhanced.dynamodb.model.ScanEnhancedRequest;
 import software.amazon.awssdk.services.dynamodb.DynamoDbClient;
+import software.amazon.awssdk.services.dynamodb.model.AttributeValue;
 
 @Component
 public class dynamodoDAOImpl implements dynamodbDAO{
 
 	private Logger logger = LogManager.getLogger(dynamodoDAOImpl.class);
+
+	public DynamoDbClient createDynamodbClient() {
+		DynamoDbClient ddb = DynamoDbClient.builder().region(ConfigConstants.defaultRegion).build();
+		return ddb;
+	}
+	
+	public DynamoDbEnhancedClient createDynamodbEnhancedClient(DynamoDbClient ddb) {
+		DynamoDbEnhancedClient enhancedClient = DynamoDbEnhancedClient.builder().dynamoDbClient(ddb).build();
+		return enhancedClient;
+	}
 	
 	@Override
 	public List<users> getAllUsers() {
@@ -36,16 +51,15 @@ public class dynamodoDAOImpl implements dynamodbDAO{
 		List<users> userList = new ArrayList<>();
 		try {
 			Iterator<users> iterator = dbTable.scan().items().iterator();	
-			ddb.close();
 			while(iterator.hasNext()) {
 				userList.add(iterator.next());
 			}
 			logger.info("All Users Retrieved");
-		} catch(Exception e) {
-			ddb.close();
+		} catch(Exception e) {			
 			e.printStackTrace();
 			logger.error("ERROR");
 		}
+		ddb.close();
 		return userList;
 	}
 
@@ -141,15 +155,35 @@ public class dynamodoDAOImpl implements dynamodbDAO{
 			return null;
 		users user = userList.get(0);
 		return user;
-	}
-	
-	public DynamoDbClient createDynamodbClient() {
-		DynamoDbClient ddb = DynamoDbClient.builder().region(ConfigConstants.defaultRegion).build();
-		return ddb;
-	}
-	
-	public DynamoDbEnhancedClient createDynamodbEnhancedClient(DynamoDbClient ddb) {
-		DynamoDbEnhancedClient enhancedClient = DynamoDbEnhancedClient.builder().dynamoDbClient(ddb).build();
-		return enhancedClient;
+	}	
+
+	@Override
+	public List<users> getAllUsersWithPagination(String lastUserSent, int count) {
+		//ALL ITEMS SCAN WITH PAGINATION
+		
+		DynamoDbClient ddb = createDynamodbClient();
+		DynamoDbEnhancedClient enhancedClient = createDynamodbEnhancedClient(ddb);
+		DynamoDbTable<users> dbTable = enhancedClient.table(ConfigConstants.user_table_name, TableSchema.fromBean(users.class));
+		List<users> userList = new ArrayList<>();		
+        AttributeValue attributeValue = AttributeValue.fromS(lastUserSent);
+        Map<String , AttributeValue> exclusiveStartKey= new HashMap<>();
+        exclusiveStartKey.put("user_id", attributeValue);        
+        try {
+        ScanEnhancedRequest scanRequest = ScanEnhancedRequest.builder()
+                .exclusiveStartKey(exclusiveStartKey)
+                .limit(count) 
+                .build();        
+        PageIterable<users> pageIterable = dbTable.scan(scanRequest);
+        Iterator<Page<users>> pageIterator = pageIterable.iterator();        
+        Page<users> page = pageIterator.next();
+        userList.addAll(page.items());
+        exclusiveStartKey = page.lastEvaluatedKey();      
+        } catch(Exception e) {
+        	logger.error("ERROR");
+        	e.printStackTrace();
+        }
+        logger.info("Retrieved "+count+" users starting from "+lastUserSent);
+		ddb.close();
+		return userList;
 	}	
 }

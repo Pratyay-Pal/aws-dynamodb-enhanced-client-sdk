@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.aws.dynamodb.dao.dynamodbDAO;
@@ -43,6 +44,15 @@ public class AllController {
 	public ResponseEntity<?> getAllUsers() {
 		logger.info("allUsers Request Received");
 		List<users> userList = dyDB.getAllUsers();
+		allUsersResponse response = new allUsersResponse();
+		response.setUserList(userList);
+		return new ResponseEntity<allUsersResponse>(response,HttpStatus.OK);
+	}
+	
+	@GetMapping("/allUsersWithPagination")
+	public ResponseEntity<?> getAllUsers(@RequestParam String lastUser, @RequestParam int count) {
+		logger.info("allUsersWithPagination Request Received");
+		List<users> userList = dyDB.getAllUsersWithPagination(lastUser, count);
 		allUsersResponse response = new allUsersResponse();
 		response.setUserList(userList);
 		return new ResponseEntity<allUsersResponse>(response,HttpStatus.OK);
