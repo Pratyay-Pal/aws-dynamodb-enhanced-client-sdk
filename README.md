@@ -15,7 +15,7 @@ You must create a DynamoDB table named "users". Create columns with the exact na
 Hit **http://localhost:8080/endpoint** with details to do Database operations.<br><br><br>
 **endpoint** can be as follows-<br><br>
 /allUsers - Lists all users<br>
-/allUsersWithPagination?lastUser=<user_id>&count=<numberOfUsers> - Lists numberOfUsers number of users starting from user user_id. Note the parameters<br>
+/allUsersWithPagination?lastUser=<user_id>&count=<number_Of_Users> - Lists number_Of_Users number of users starting from user user_id. Note the parameters<br>
 /getUserDetails - Get specific user details. Requires user_id as request body<br>
 /createUser - Create a new user. Requires name, email, ign as request body<br>
 /deleteUser - Delete a specific user. Requires user_id as request body<br>
